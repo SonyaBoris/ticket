@@ -1,50 +1,51 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Описание
 
-Currently, two official plugins are available:
+Этот проект представляет собой библиотеку компонентов, созданную с использованием React, TypeScript и различных технологий для UI и серверного взаимодействия. Цель проекта — предоставить компоненты для удобного отображения и фильтрации билетов, используя различные параметры, такие как количество пересадок.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Используемые технологии
 
-## Expanding the ESLint configuration
+- React (с использованием TypeScript) — для создания UI и компонентов.
+- Shadcn UI — библиотека компонентов для создания красивого и функционального интерфейса.
+- Tailwind CSS — для стилизации компонентов и быстрой настройки внешнего вида.
+- Mokky Dev — сервис для хранения данных на сервере.
+- Redux Toolkit — для управления состоянием приложения и работы с запросами к серверу (включая фильтрацию данных по количеству пересадок).
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Установка
 
-- Configure the top-level `parserOptions` property like this:
+Для начала работы с проектом, выполните следующие шаги:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1. Клонируйте репозиторий:
+   git clone <url-репозитория>
+   
+3. Перейдите в папку проекта:
+cd ‹название-папки>
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+3. Установите зависимости:
+npm install
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+5. Запустите проект:
+npm start
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+Описание компонентов
+
+1. Компоненты UI
+
+Все компоненты были созданы с использованием библиотеки Shadcn UI и стилизованы с помощью Tailwind CSS. Среди компонентов есть:
+
+Button — стандартная кнопка с поддержкой различных стилей и состояний.
+TicketList — компонент для отображения списка билетов.
+TicketFilter — фильтр для поиска билетов по количеству пересадок.
+
+2. Redux Toolkit для фильтрации билетов
+Мы используем Redux Toolkit для работы с состоянием приложения. Запросы к серверу для получения данных о билетах включают параметры фильтрации, такие как количество пересадок. Все запросы отправляются с помощью API, который добавляет фильтры в тело запроса.
+
+3. Mokky Dev для хранения данных
+Для хранения данных билетов используется Mokky Dev, что позволяет нам тестировать серверные запросы без необходимости в полноценной серверной настройке. Данные можно менять в интерфейсе Mokky Dev, и они автоматически обновляются в приложении.
+
+Как использовать:
+
+В компоненте TicketFilter выберите количество пересадок, которое вы хотите применить для фильтрации.
+Нажмите кнопку Применить фильтр, чтобы отфильтровать список билетов.
+Список билетов будет обновлен в соответствии с выбранными параметрами фильтра.
