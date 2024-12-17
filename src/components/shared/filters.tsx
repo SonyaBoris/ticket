@@ -9,18 +9,27 @@ import { fetchTickets } from '@/store/slices/ticketsSlice';
 
 interface Props {
   className?: string;
+  changeCurrency: (cur: string) => void;
 }
 
-export const Filters: React.FC<React.PropsWithChildren<Props>> = ({ className }) => {
+export interface ITransfers {
+  all: boolean;
+  noTransfer: boolean;
+  oneTransfer: boolean;
+  twoTransfers: boolean;
+  threeTransfers: boolean;
+}
 
-  const { control, watch } = useForm({
+const Filters: React.FC<React.PropsWithChildren<Props>> = ({ className, changeCurrency }) => {
+
+  const { control, watch, setValue } = useForm({
     defaultValues: {
       transfers: {
         all: true,
-        noTransfer: false,
-        oneTransfer: false,
-        twoTransfers: false,
-        threeTransfers: false,
+        noTransfer: true,
+        oneTransfer: true,
+        twoTransfers: true,
+        threeTransfers: true,
       },
     },
   });
@@ -28,109 +37,92 @@ export const Filters: React.FC<React.PropsWithChildren<Props>> = ({ className })
   const dispatch = useAppDispatch();
   const transfers = watch('transfers');
 
-  const handleCheckboxChange = (name: any) => {
 
-    if (name === 'all' && transfers.all) {
-      dispatch(fetchTickets({ transfer: [] }));
+  const renderFilter = () => {
+    const selectedTransfers = Object.keys(transfers)
+      .filter((key) => transfers[key as keyof typeof transfers])
+      .map((key) => {
+        if (key === 'noTransfer') return 0;
+        if (key === 'oneTransfer') return 1;
+        if (key === 'twoTransfers') return 2;
+        if (key === 'threeTransfers') return 3;
+        return -1;
+      })
+      .filter((value) => value !== -1);
+
+    dispatch(fetchTickets({ transfer: selectedTransfers }));
+  };
+
+  const resetOtherFilters = (selectedKey: keyof typeof transfers) => {
+    Object.keys(transfers).forEach((key) => {
+      setValue(`transfers.${key as keyof typeof transfers}`, key === selectedKey);
+    });
+    renderFilter();
+  };
+
+  const handleCheckboxChange = (name: string) => {
+    if (name === 'all') {
+      const newTransfersState = { all: true, noTransfer: true, oneTransfer: true, twoTransfers: true, threeTransfers: true };
+      Object.keys(newTransfersState).forEach((key) => setValue(`transfers.${key as keyof typeof transfers}`, newTransfersState[key as keyof typeof newTransfersState]));
+      dispatch(fetchTickets({ transfer: [0, 1, 2, 3] }));
     } else {
-      const selectedTransfers = [];
-      if (transfers.noTransfer) selectedTransfers.push(0);
-      if (transfers.oneTransfer) selectedTransfers.push(1);
-      if (transfers.twoTransfers) selectedTransfers.push(2);
-      if (transfers.threeTransfers) selectedTransfers.push(3);
-
-      dispatch(fetchTickets({ transfer: selectedTransfers }));
+      setValue('transfers.all', false);
+      renderFilter();
     }
   };
 
-  return <div className={cn('bg-white rounded shadow-sm h-full', className)}>
-    <div className='p-8'>
-      <Title text="Валюта" className="mb-4 uppercase font-medium" />
-      <Tabs defaultValue="rub">
-        <TabsList>
-          <TabsTrigger value="rub">rub</TabsTrigger>
-          <TabsTrigger value="usd">usd</TabsTrigger>
-          <TabsTrigger value="eur">eur</TabsTrigger>
-        </TabsList>
-      </Tabs>
+  const renderCheckbox = (text: string, value: keyof typeof transfers) => (
+    <Controller
+      key={value}
+      name={`transfers.${value}`}
+      control={control}
+      render={({ field }) => (
+        <FilterCheckbox
+          text={text}
+          value={value}
+          checked={field.value}
+          resetOtherFilters={resetOtherFilters}
+          onCheckedChange={(checked) => {
+            field.onChange(checked);
+            handleCheckboxChange(value);
+          }}
+        />
+      )}
+    />
+  );
+
+  return (
+    <div className={cn('bg-white rounded shadow-sm h-full sticky top-4', className)}>
+      <div className="p-8">
+        <Title text="Валюта" className="mb-4 uppercase font-medium" />
+        <Tabs defaultValue="rub">
+          <TabsList>
+            <TabsTrigger value="rub" onClick={() => changeCurrency("rub")}>rub</TabsTrigger>
+            <TabsTrigger value="usd" onClick={() => changeCurrency("usd")}>usd</TabsTrigger>
+            <TabsTrigger value="eur" onClick={() => changeCurrency("eur")}>eur</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="pb-8">
+        <Title text="Количество пересадок" className="mb-4 uppercase px-8 font-medium" />
+        {['all', 'noTransfer', 'oneTransfer', 'twoTransfers', 'threeTransfers'].map((transfer) =>
+          renderCheckbox(
+            transfer === 'all'
+              ? 'Все'
+              : transfer === 'noTransfer'
+                ? 'Без пересадки'
+                : transfer === 'oneTransfer'
+                  ? '1 пересадка'
+                  : transfer === 'twoTransfers'
+                    ? '2 пересадки'
+                    : '3 пересадки',
+            transfer as keyof typeof transfers
+          )
+        )}
+      </div>
     </div>
-    <div className='pb-8'>
-      <Title text="Количество пересадок" className="mb-4 uppercase px-8 font-medium" />
-      <Controller
-        name="transfers.all"
-        control={control}
-        render={({ field }) => (
-          <FilterCheckbox
-            text="Все"
-            value="all"
-            checked={field.value}
-            onCheckedChange={(checked) => {
-              field.onChange(checked);
-              handleCheckboxChange('all');
-            }}
-          />
-        )}
-      />
-      <Controller
-        name="transfers.noTransfer"
-        control={control}
-        render={({ field }) => (
-          <FilterCheckbox
-            text="Без пересадки"
-            value="noTransfer"
-            checked={field.value}
-            onCheckedChange={(checked) => {
-              field.onChange(checked);
-              handleCheckboxChange('noTransfer');
-            }}
-          />
-        )}
-      />
-      <Controller
-        name="transfers.oneTransfer"
-        control={control}
-        render={({ field }) => (
-          <FilterCheckbox
-            text="1 пересадка"
-            value="oneTransfer"
-            checked={field.value}
-            onCheckedChange={(checked) => {
-              field.onChange(checked);
-              handleCheckboxChange('oneTransfer');
-            }}
-          />
-        )}
-      />
-      <Controller
-        name="transfers.twoTransfers"
-        control={control}
-        render={({ field }) => (
-          <FilterCheckbox
-            text="2 пересадки"
-            value="twoTransfers"
-            checked={field.value}
-            onCheckedChange={(checked) => {
-              field.onChange(checked);
-              handleCheckboxChange('twoTransfers');
-            }}
-          />
-        )}
-      />
-      <Controller
-        name="transfers.threeTransfers"
-        control={control}
-        render={({ field }) => (
-          <FilterCheckbox
-            text="3 пересадки"
-            value="threeTransfers"
-            checked={field.value}
-            onCheckedChange={(checked) => {
-              field.onChange(checked);
-              handleCheckboxChange('threeTransfers');
-            }}
-          />
-        )}
-      />
-    </div>
-  </div>;
+  );
 };
+
+export default Filters

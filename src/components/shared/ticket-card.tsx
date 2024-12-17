@@ -6,15 +6,43 @@ import { ITickets } from "@/store/slices/ticketsSlice";
 
 interface Props {
   ticket: ITickets;
+  currency: string;
 }
 
-export const TicketCard: React.FC<Props> = ({ ticket }) => {
+export const TicketCard: React.FC<Props> = ({ ticket, currency }) => {
+
+  const [cachedTicket, setCachedTicket] = React.useState<ITickets | null>(null);
+
+  React.useEffect(() => {
+    const cached = localStorage.getItem(`ticket-${ticket.id}`);
+    if (cached) {
+      setCachedTicket(JSON.parse(cached));
+    } else {
+      localStorage.setItem(`ticket-${ticket.id}`, JSON.stringify(ticket));
+      setCachedTicket(ticket);
+    }
+  }, [ticket.price, currency]);
+
+
+  const activeCurrency = React.useMemo(() => {
+    switch (currency) {
+      case 'rub':
+        return `${ticket.price} ₽`;
+      case 'usd':
+        return `${Math.round(ticket.price / 103)} $`;
+      case 'eur':
+        return `${Math.round(ticket.price / 108)} €`;
+      default:
+        return `${ticket.price} ₽`;
+    }
+  }, [ticket.price, currency]);
+
 
   return (
     <div className="bg-white rounded shadow-sm flex">
       <div className="p-8 border-r w-[280px]">
         <img src={logo} width={200} />
-        <Button>Купить <br /> за {ticket.price} &#8381;</Button>
+        <Button>Купить <br /> за {activeCurrency}</Button>
       </div>
       <div className="p-8 flex justify-between flex-1 items-center">
         <div className="flex flex-col">
@@ -34,5 +62,4 @@ export const TicketCard: React.FC<Props> = ({ ticket }) => {
       </div>
     </div>
   )
-
 }

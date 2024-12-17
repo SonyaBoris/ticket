@@ -5,10 +5,10 @@ import { useSelector } from "react-redux";
 import { fetchTickets } from "@/store/slices/ticketsSlice";
 
 interface Props {
-
+  currency: string;
 }
 
-export const TicketGroupList: React.FC<Props> = ({ }) => {
+const TicketGroupList: React.FC<Props> = ({ currency }) => {
   const dispatch = useAppDispatch();
   const tickets = useSelector((state: RootState) => state.tisket.data)
 
@@ -18,16 +18,15 @@ export const TicketGroupList: React.FC<Props> = ({ }) => {
     );
   }, []);
 
-  console.log(tickets)
   return (
     <div className="w-full flex flex-col gap-5">
       {
         tickets.map((ticket, index) => (
-          <TicketCard key={index} ticket={ticket} />
+          <TicketCard key={index} ticket={ticket} currency={currency} />
         ))
       }
-
     </div>
   )
-
 }
+
+export default TicketGroupList;

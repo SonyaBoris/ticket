@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export interface ITickets {
+  id: number,
   origin: string,
   origin_name: string,
   destination: string,
@@ -13,23 +14,22 @@ export interface ITickets {
   carrier: string,
   stops: number,
   price: number
-}
+};
 
 interface IParams {
   transfer: number[];
-}
+};
 
 export const fetchTickets = createAsyncThunk<ITickets[], IParams>(
   "tickets/fetchTickets",
   async (params, { rejectWithValue }) => {
     try {
       const stopsQuery = params.transfer.length > 0
-        ? `?${params.transfer.map(value => `stops[]=${value}`).join("&")}`: '';
+        ? `?${params.transfer.map(value => `stops[]=${value}`).join("&")}` : '';
 
 
       const { data } = await axios.get<ITickets[]>(
-       ` https://63e53e7652c87222.mokky.dev/tickets${stopsQuery}`
-    
+        ` https://63e53e7652c87222.mokky.dev/tickets${stopsQuery}`
       );
 
       localStorage.setItem("tickets", JSON.stringify(data));
@@ -44,7 +44,7 @@ export const fetchTickets = createAsyncThunk<ITickets[], IParams>(
 
 interface IState {
   data: ITickets[];
-}
+};
 
 const initialState: IState = {
   data: JSON.parse(localStorage.getItem("tickets") || "[]"),
