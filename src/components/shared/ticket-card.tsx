@@ -13,6 +13,8 @@ export const TicketCard: React.FC<Props> = ({ ticket, currency }) => {
 
   const [cachedTicket, setCachedTicket] = React.useState<ITickets | null>(null);
 
+  console.log(cachedTicket)
+
   React.useEffect(() => {
     const cached = localStorage.getItem(`ticket-${ticket.id}`);
     if (cached) {
